@@ -1,5 +1,3 @@
-# pytextcmd-0.0.1
-
 from pynput import keyboard
 
 kbctrl = keyboard.Controller()

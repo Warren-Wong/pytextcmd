@@ -236,13 +236,13 @@ cmd_handler_list.append( cmd_handler( ''.join(['^inline$']) , cmd_handler_ ))
 
 #array _expr
 def cmd_handler_(arg):
-    s = 'ArrayList<T> _var = new ArrayList<T>();\n'.format(arg[0])
+    s = 'ArrayList<T> {} = new ArrayList<T>();\n'.format(arg[0])
     return s
 cmd_handler_list.append( cmd_handler( ''.join(['^array',sp,expr]) , cmd_handler_ ))
 
 #map _expr
 def cmd_handler_(arg):
-    s = "HashMap<Tkey, Tval> _var = new HashMap<Tkey, Tval>();\n".format(arg[0])
+    s = "HashMap<Tkey, Tval> {} = new HashMap<Tkey, Tval>();\n".format(arg[0])
     return s
 cmd_handler_list.append( cmd_handler( ''.join(['^map',sp,expr]) , cmd_handler_ ))
 

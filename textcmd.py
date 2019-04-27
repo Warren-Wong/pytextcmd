@@ -1,5 +1,3 @@
-# pytextcmd-0.1.2
-
 from enum import Enum
 from pynput import keyboard
 from keymap import kbctrl, char2press, key2char
