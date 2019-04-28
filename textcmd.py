@@ -27,6 +27,9 @@ class global_system:
             'tc':tc.exec_cmd
         }
 
+    def help(self):
+        return str(self.cmd_handler_map.keys());
+
     def clear_buffer(self):
         self.input_buff = ''
         self.output_buff = ''
@@ -51,8 +54,10 @@ class global_system:
 
     def get_resp(self, cmd):
         cmd_h = self.cmd_handler_map.get(self.cmd_handler)
-        if cmd_h == None: # No not have a handler yet, try to set one
-            if self.cmd_handler_map.get(cmd) != None:
+        if cmd_h == None: # Do not have a handler yet, try to set one
+            if cmd == 'help':
+                return self.help();
+            elif self.cmd_handler_map.get(cmd) != None:
                 self.cmd_handler = cmd
                 return 'Handler Set to {}'.format(cmd)
             else:
@@ -81,15 +86,20 @@ class global_system:
         elif self.status == gsys_status.read_cmd:
             if c != self.signal[1]:
                 if c == '\b' and len(self.input_buff)>0:
+                    #backspace, delete a char in input_buff
                     self.input_buff = self.input_buff[:-1]
                 elif c == '\b' and len(self.input_buff)==0:
+                    #backspace, exit command reading
                     self.change_status(gsys_status.wait_signal)
                 else:
+                    #normal char, put into input_buff
                     self.input_buff += c
             else:
+                #finish command input, run the command
                 self.change_status(gsys_status.resp_cmd)
                 self.output_erase_cmd()
                 if len(self.input_buff)==0:
+                    #command is
                     self.change_status(gsys_status.wait_signal)
                 else:
                     resp = self.get_resp( self.input_buff)
