@@ -157,8 +157,12 @@ cmd_handler_list.append( util.cmd_handler( ''.join(['^init$']) , cmd_handler_ ))
 
 #include _expr
 def cmd_handler_(arg):
-    s = '#include "{0}"\n'.format(arg[0])
-    s += '// or include <{0}>\n'.format(arg[0])
+    headfile = arg[0].split('.')[0]
+    s = ''
+    s += '#ifndef __has_included_{}\n'.format(headfile)
+    s += '#define __has_included_{}\n'.format(headfile)
+    s += '#include "{0}"\n'.format(arg[0])
+    s += '#endif\n'.format(arg[0])
     return s
 cmd_handler_list.append( util.cmd_handler( ''.join(['^include',sp,expr]) , cmd_handler_ ))
 
