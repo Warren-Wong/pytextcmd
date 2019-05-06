@@ -1,136 +1,70 @@
-from pynput import keyboard
+k2c_special = {
+    53:'esc', 117:'delete',
+    57:'caps_lock', 63:'fn',
+    56:'shift', 60:'shift_r',
+    59:'ctrl', 62:'ctrl_r',
+    58:'alt', 61:'alt_r',
+    55:'cmd', 54:'cmd_r',
+    126:'up', 125:'down',
+    123:'left', 124:'right' }
 
-kbctrl = keyboard.Controller()
+k2c = {
+    50:'`', 18:'1', 19:'2', 20:'3', 21:'4',
+    23:'5', 22:'6', 26:'7', 28:'8', 25:'9',
+    29:'0', 27:'-', 24:'=', 12:'q', 13:'w',
+    14:'e', 15:'r', 17:'t', 16:'y', 32:'u',
+    34:'i', 31:'o', 35:'p', 33:'[', 30:']',
+    42:'\\', 0:'a',  1:'s',  2:'d',  3:'f',
+    5:'g',   4:'h', 38:'j', 40:'k', 37:'l',
+    41:';', 39:"'",  6:'z',  7:'x',  8:'c',
+    9:'v',  11:'b', 45:'n', 46:'m', 43:',',
+    47:'.', 44:'/', 48:'\t', 49:' ', 51:'\b',
+    36:'\n'}
 
-char_key_map = {
-None:[],
-'':[],
-'`':[keyboard.KeyCode(vk=50)],
-'1':[keyboard.KeyCode(vk=18)],
-'2':[keyboard.KeyCode(vk=19)],
-'3':[keyboard.KeyCode(vk=20)],
-'4':[keyboard.KeyCode(vk=21)],
-'5':[keyboard.KeyCode(vk=23)],
-'6':[keyboard.KeyCode(vk=22)],
-'7':[keyboard.KeyCode(vk=26)],
-'8':[keyboard.KeyCode(vk=28)],
-'9':[keyboard.KeyCode(vk=25)],
-'0':[keyboard.KeyCode(vk=29)],
-'-':[keyboard.KeyCode(vk=27)],
-'=':[keyboard.KeyCode(vk=24)],
-'~':[keyboard.Key.shift,keyboard.KeyCode(vk=50)],
-'!':[keyboard.Key.shift,keyboard.KeyCode(vk=18)],
-'@':[keyboard.Key.shift,keyboard.KeyCode(vk=19)],
-'#':[keyboard.Key.shift,keyboard.KeyCode(vk=20)],
-'$':[keyboard.Key.shift,keyboard.KeyCode(vk=21)],
-'%':[keyboard.Key.shift,keyboard.KeyCode(vk=23)],
-'^':[keyboard.Key.shift,keyboard.KeyCode(vk=22)],
-'&':[keyboard.Key.shift,keyboard.KeyCode(vk=26)],
-'*':[keyboard.Key.shift,keyboard.KeyCode(vk=28)],
-'(':[keyboard.Key.shift,keyboard.KeyCode(vk=25)],
-')':[keyboard.Key.shift,keyboard.KeyCode(vk=29)],
-'_':[keyboard.Key.shift,keyboard.KeyCode(vk=27)],
-'+':[keyboard.Key.shift,keyboard.KeyCode(vk=24)],
-'q':[keyboard.KeyCode(vk=12)],
-'w':[keyboard.KeyCode(vk=13)],
-'e':[keyboard.KeyCode(vk=14)],
-'r':[keyboard.KeyCode(vk=15)],
-'t':[keyboard.KeyCode(vk=17)],
-'y':[keyboard.KeyCode(vk=16)],
-'u':[keyboard.KeyCode(vk=32)],
-'i':[keyboard.KeyCode(vk=34)],
-'o':[keyboard.KeyCode(vk=31)],
-'p':[keyboard.KeyCode(vk=35)],
-'[':[keyboard.KeyCode(vk=33)],
-']':[keyboard.KeyCode(vk=30)],
-'\\':[keyboard.KeyCode(vk=42)],
-'Q':[keyboard.Key.shift,keyboard.KeyCode(vk=12)],
-'W':[keyboard.Key.shift,keyboard.KeyCode(vk=13)],
-'E':[keyboard.Key.shift,keyboard.KeyCode(vk=14)],
-'R':[keyboard.Key.shift,keyboard.KeyCode(vk=15)],
-'T':[keyboard.Key.shift,keyboard.KeyCode(vk=17)],
-'Y':[keyboard.Key.shift,keyboard.KeyCode(vk=16)],
-'U':[keyboard.Key.shift,keyboard.KeyCode(vk=32)],
-'I':[keyboard.Key.shift,keyboard.KeyCode(vk=34)],
-'O':[keyboard.Key.shift,keyboard.KeyCode(vk=31)],
-'P':[keyboard.Key.shift,keyboard.KeyCode(vk=35)],
-'{':[keyboard.Key.shift,keyboard.KeyCode(vk=33)],
-'}':[keyboard.Key.shift,keyboard.KeyCode(vk=30)],
-'|':[keyboard.Key.shift,keyboard.KeyCode(vk=42)],
-'a':[keyboard.KeyCode(vk=0)],
-'s':[keyboard.KeyCode(vk=1)],
-'d':[keyboard.KeyCode(vk=2)],
-'f':[keyboard.KeyCode(vk=3)],
-'g':[keyboard.KeyCode(vk=5)],
-'h':[keyboard.KeyCode(vk=4)],
-'j':[keyboard.KeyCode(vk=38)],
-'k':[keyboard.KeyCode(vk=40)],
-'l':[keyboard.KeyCode(vk=37)],
-';':[keyboard.KeyCode(vk=41)],
-"'":[keyboard.KeyCode(vk=39)],
-'A':[keyboard.Key.shift,keyboard.KeyCode(vk=0)],
-'S':[keyboard.Key.shift,keyboard.KeyCode(vk=1)],
-'D':[keyboard.Key.shift,keyboard.KeyCode(vk=2)],
-'F':[keyboard.Key.shift,keyboard.KeyCode(vk=3)],
-'G':[keyboard.Key.shift,keyboard.KeyCode(vk=5)],
-'H':[keyboard.Key.shift,keyboard.KeyCode(vk=4)],
-'J':[keyboard.Key.shift,keyboard.KeyCode(vk=38)],
-'K':[keyboard.Key.shift,keyboard.KeyCode(vk=40)],
-'L':[keyboard.Key.shift,keyboard.KeyCode(vk=37)],
-':':[keyboard.Key.shift,keyboard.KeyCode(vk=41)],
-'"':[keyboard.Key.shift,keyboard.KeyCode(vk=39)],
-'z':[keyboard.KeyCode(vk=6)],
-'x':[keyboard.KeyCode(vk=7)],
-'c':[keyboard.KeyCode(vk=8)],
-'v':[keyboard.KeyCode(vk=9)],
-'b':[keyboard.KeyCode(vk=11)],
-'n':[keyboard.KeyCode(vk=45)],
-'m':[keyboard.KeyCode(vk=46)],
-',':[keyboard.KeyCode(vk=43)],
-'.':[keyboard.KeyCode(vk=47)],
-'/':[keyboard.KeyCode(vk=44)],
-'Z':[keyboard.Key.shift,keyboard.KeyCode(vk=6)],
-'X':[keyboard.Key.shift,keyboard.KeyCode(vk=7)],
-'C':[keyboard.Key.shift,keyboard.KeyCode(vk=8)],
-'V':[keyboard.Key.shift,keyboard.KeyCode(vk=9)],
-'B':[keyboard.Key.shift,keyboard.KeyCode(vk=11)],
-'N':[keyboard.Key.shift,keyboard.KeyCode(vk=45)],
-'M':[keyboard.Key.shift,keyboard.KeyCode(vk=46)],
-'<':[keyboard.Key.shift,keyboard.KeyCode(vk=43)],
-'>':[keyboard.Key.shift,keyboard.KeyCode(vk=47)],
-'?':[keyboard.Key.shift,keyboard.KeyCode(vk=44)],
-'\n':[keyboard.Key.enter],
-'\t':[keyboard.Key.tab],
-'\b':[keyboard.Key.backspace],
-' ':[keyboard.Key.space]
-}
+k2c_shift = {
+    50:'~', 18:'!', 19:'@', 20:'#', 21:'$',
+    23:'%', 22:'^', 26:'&', 28:'*', 25:'(',
+    29:')', 27:'_', 24:'+', 12:'Q', 13:'W',
+    14:'E', 15:'R', 17:'T', 16:'Y', 32:'U',
+    34:'I', 31:'O', 35:'P', 33:'{', 30:'}',
+    42:'|',  0:'A',  1:'S',  2:'D',  3:'F',
+    5:'G',   4:'H', 38:'J', 40:'K', 37:'L',
+    41:':', 39:'"',  6:'Z',  7:'X',  8:'C',
+    9:'V',  11:'B', 45:'N', 46:'M', 43:'<',
+    47:'>', 44:'?' }
 
-def char2key(c):
-    return char_key_map.get(c)
+c2k_special = {
+    'esc':53, 'delete':117,
+    'caps_lock':57, 'fn':63,
+    'shift':56, 'shift_r':60,
+    'ctrl':59, 'ctrl_r':62,
+    'alt':58, 'alt_r':61,
+    'cmd':55, 'cmd_r':54,
+    'up':126, 'down':125,
+    'left':123, 'right':124 }
 
-def char2press(c):
-    key = char2key(c)
-    if key == None or len(key) == 0:
-        raise Exception('char2press: unknown char')
-    elif len(key) == 1:
-        kbctrl.press(key[0])
-    else:
-        with kbctrl.pressed(key[0]):
-            kbctrl.press(key[1])
+c2k = {
+    '`':50, '1':18, '2':19, '3':20, '4':21,
+    '5':23, '6':22, '7':26, '8':28, '9':25,
+    '0':29, '-':27, '=':24, 'q':12, 'w':13,
+    'e':14, 'r':15, 't':17, 'y':16, 'u':32,
+    'i':34, 'o':31, 'p':35, '[':33, ']':30,
+    '\\':42, 'a':0, 's':1, 'd':2, 'f':3,
+    'g':5, 'h':4, 'j':38, 'k':40, 'l':37,
+    ';':41, "'":39, 'z':6, 'x':7, 'c':8,
+    'v':9, 'b':11, 'n':45, 'm':46, ',':43,
+    '.':47, '/':44,
+    '\t':48, ' ':49, '\b':51, '\n':36,
+    'tab':48, 'space':49, 'backspace':51, 'enter':36 }
 
-def key2char(key):
-    c = None
-    if(type(key) == keyboard.Key):
-        if( key == keyboard.Key.enter):
-            c = '\n'
-        elif( key == keyboard.Key.backspace):
-            c = '\b'
-        elif( key == keyboard.Key.tab):
-            c = '\t'
-        elif( key == keyboard.Key.space):
-            c = ' '
-    elif( type(key) == keyboard.KeyCode):
-        c = str(key)[1]
-    else:
-        raise Exception('key2char: cannot match char')
-    return c
+c2k_shift = {
+    '~':50, '!':18, '@':19, '#':20, '$':21,
+    '%':23, '^':22, '&':26, '*':28, '(':25,
+    ')':29, '_':27, '+':24, 'Q':12, 'W':13,
+    'E':14, 'R':15, 'T':17, 'Y':16, 'U':32,
+    'I':34, 'O':31, 'P':35, '{':33, '}':30,
+    '|':42, 'A':0, 'S':1, 'D':2, 'F':3,
+    'G':5, 'H':4, 'J':38, 'K':40, 'L':37,
+    ':':41, '"':39, 'Z':6, 'X':7, 'C':8,
+    'V':9, 'B':11, 'N':45, 'M':46, '<':43,
+    '>':47, '?':44 }

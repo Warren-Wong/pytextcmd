@@ -1,20 +1,10 @@
-from enum import Enum
-from pynput import keyboard
-from keymap import kbctrl, char2press, key2char
+import keyloop
+import util
 from handler import tpy, tjs, tphp, tjava, bash, echo, thtml, tc
+from time import sleep
 
-
-class gsys_status(Enum):
-    wait_signal = 0
-    read_cmd = 1
-    resp_cmd = 2
-
-class global_system:
+class HandlerSystem:
     def __init__(self):
-        self.signal = ['`','`']
-        self.status = gsys_status.wait_signal
-        self.input_buff = ''
-        self.output_buff = ''
         self.cmd_handler = ''
         self.cmd_handler_map = {
             'tpy':tpy.exec_cmd,
@@ -26,32 +16,8 @@ class global_system:
             'thtml':thtml.exec_cmd,
             'tc':tc.exec_cmd
         }
-
     def help(self):
         return str(self.cmd_handler_map.keys());
-
-    def clear_buffer(self):
-        self.input_buff = ''
-        self.output_buff = ''
-
-    def debug_print(self):
-        print('DEBUG:')
-        print('    self.cmd_handler => {0}'.format( self.cmd_handler))
-        print('    self.input_buff => {0}'.format( self.input_buff))
-        print('    self.output_buff => {0}'.format( self.output_buff))
-
-    def output_erase_cmd(self): # erase command, include begin and end signal char
-        if self.status == gsys_status.resp_cmd:
-            for i in range(0, len(self.input_buff)+2):
-                char2press('\b')
-
-    def output_write_resp(self, resp):
-        if resp == None:
-            resp = ''
-        self.output_buff = resp
-        for i in range(0,len(resp)):
-            char2press(resp[i])
-
     def get_resp(self, cmd):
         cmd_h = self.cmd_handler_map.get(self.cmd_handler)
         if cmd_h == None: # Do not have a handler yet, try to set one
@@ -59,81 +25,85 @@ class global_system:
                 return self.help();
             elif self.cmd_handler_map.get(cmd) != None:
                 self.cmd_handler = cmd
-                return 'Handler Set to {}'.format(cmd)
+                return '' #'Handler Set to {}'.format(cmd)
             else:
-                return 'Handler {} not found'.format(cmd)
+                return '' #'Handler {} not found'.format(cmd)
         else: # has a command handler, run command
             resp = cmd_h( cmd)
+            if resp == None:
+                resp = ''
             return resp
+    def get_prompt(self):
+        if self.cmd_handler == '':
+            return '#'
+        else:
+            return self.cmd_handler+'#'
 
-    def change_status(self, status):
-        if status == gsys_status.read_cmd:
-            self.clear_buffer()
-        elif status == gsys_status.wait_signal:
-            self.clear_buffer()
-        elif status == gsys_status.resp_cmd:
+class CmdLine:
+    def __init__(self):
+        self.is_active = False
+        self.prompt = ''
+        self.buff = []
+        self.input = []
+    def __str__(self):
+        return "CmdLine[{!r}]<prompt:{!r} buff:{!r} input:{!r}>".format( self.is_active, self.prompt, ''.join(self.buff), ''.join(self.input))
+    def write_prompt(self):
+        self.buff.extend(self.prompt)
+        keyloop.chario.write(self.prompt)
+    def erase_all(self):
+         erace = '\b'*( len(self.buff) )
+         keyloop.chario.write(erace)
+    def active(self):
+        self.buff.clear()
+        self.input.clear()
+        self.is_active = True
+    def inactive(self):
+        self.is_active = False
+    def update(self,c):
+        print("CmdLine.update <= {!r}".format(c))
+        ret = ''
+        if c is '':
             pass
-        else:
-            raise Exception('Unknow status')
-        print("stats change: {} => {}".format(self.status,status))
-        self.status = status
-
-    def process(self, key):
-        c = key2char(key)
-        if self.status == gsys_status.wait_signal:
-            if c == self.signal[0]:
-                self.change_status( gsys_status.read_cmd)
-        elif self.status == gsys_status.read_cmd:
-            if c != self.signal[1]:
-                if c == '\b' and len(self.input_buff)>0:
-                    #backspace, delete a char in input_buff
-                    self.input_buff = self.input_buff[:-1]
-                elif c == '\b' and len(self.input_buff)==0:
-                    #backspace, exit command reading
-                    self.change_status(gsys_status.wait_signal)
-                else:
-                    #normal char, put into input_buff
-                    self.input_buff += c
+        elif self.is_active == False and c == '`':
+            self.active()
+            self.buff.append(c)
+            self.write_prompt()
+        elif self.is_active == True and c == '`':
+            self.buff.append(c)
+            self.erase_all()
+            self.inactive()
+            ret = ''.join(self.input)
+        elif self.is_active == True and c == '\b':
+            if len(self.input) > 0:
+                self.input.pop()
+                self.buff.pop()
             else:
-                #finish command input, run the command
-                self.change_status(gsys_status.resp_cmd)
-                self.output_erase_cmd()
-                if len(self.input_buff)==0:
-                    #command is
-                    self.change_status(gsys_status.wait_signal)
-                else:
-                    resp = self.get_resp( self.input_buff)
-                    self.output_write_resp( resp)
-        elif self.status == gsys_status.resp_cmd:
-            if len(self.output_buff) > 1:
-                self.output_buff = self.output_buff[1:]
-            else:
-                self.change_status(gsys_status.wait_signal)
+                self.buff.pop()
+                self.erase_all()
+                self.inactive()
+        elif self.is_active == True:
+            self.input.append(c)
+            self.buff.append(c)
+        return ret
 
-gsys = global_system()
+class Admin(keyloop.KeyEventCallback):
+    def __init__(self):
+        keyloop.KeyEventCallback.__init__(self)
+        self.cmdline = CmdLine()
+        self.hsys = HandlerSystem()
+        self.tags = []
+        self.cmdline.prompt = self.hsys.get_prompt()
+    def on_press(self,key):
+        c = keyloop.chario.read()
+        cmd = self.cmdline.update(c)
+        print("cmd={!r}".format(cmd))
+        print(self.cmdline)
+        if len(cmd) > 0:
+            outStr = self.hsys.get_resp(cmd)
+            keyloop.chario.write(outStr)
+            self.cmdline.prompt = self.hsys.get_prompt()
 
-def on_press(key):
-    try:
-        print('key {0}: char: {1}'.format( str(key), key2char(key)))
-        if key == keyboard.Key.esc:
-            if gsys.cmd_handler != None and len(gsys.cmd_handler)>0:
-                gsys.cmd_handler = ''
-            else:
-                return False
-        else:
-            gsys.process( key)
-    except AttributeError as err:
-        print('AttributeError: key {0}: {1}'.format( str(key),err))
-        gsys.debug_print()
-    except Exception as err:
-        print('Exception: key {0}: {1}'.format( str(key),err))
-        gsys.debug_print()
 
-def on_release(key):
-    pass
-
-# Collect events until released
-with keyboard.Listener(
-        on_press=on_press,
-        on_release=on_release) as listener:
-    listener.join()
+admin = Admin()
+keyloop.add_callback(admin)
+keyloop.loop()

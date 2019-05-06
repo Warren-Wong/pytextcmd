@@ -1,4 +1,4 @@
-
+import re
 
 def exec_cmd(cmd_buff):
     cmd = re.sub(' +',' ',cmd_buff).strip().split(' ')
@@ -67,7 +67,7 @@ def exec_cmd(cmd_buff):
         elif cmd[0] == 'html':
             resp = '<!DOCTYPE html>\n'
             resp += '<html>\n'
-            resp += cmd_extend_html('head')
+            resp += exec_cmd('head')
             resp += '<body></body>\n'
             resp += '</html>\n'
         elif cmd[0] == 'form':
